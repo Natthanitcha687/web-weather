@@ -3,66 +3,62 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>🌤️ สภาพอากาศ (TH)</title>
-
-  <!-- Fonts -->
+  <title>🌤️ สภาพอากาศ (TH) — Pastel Blue</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="styles.css" />
-
-  <!-- Config (ต้องโหลดก่อน app.js) -->
-  <script src="config.js?v=1"></script>
-  <script src="app.js?v=1" defer></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+  <script src="/config.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
   <div id="wxfx" aria-hidden="true"></div>
   <div id="rainPopup" class="popup" style="display:none"></div>
   <header class="hero">
     <div class="title">🌤️ สภาพอากาศ (TH)</div>
-    <div class="subtitle">Bangkok, TH</div>
+    <div class="subtitle">Bangkok, TH </div>
   </header>
 
   <div class="toolbar">
-    <div class="left">
-      <span class="badge" id="placeBadge">📍 Bangkok, TH</span>
-      <span class="badge" id="tzBadge">🕒 Asia/Bangkok</span>
-    </div>
-    <div id="uiError" class="uierror" style="display:none"></div>
-    <div class="right">
-      <button id="btnRefresh" class="btn" style="color:black;">🔄 รีเฟรช</button>
-
-      <div class="seg">
-        <button id="unitC" class="seg-btn active">°C</button>
-        <button id="unitF" class="seg-btn">°F</button>
-      </div>
-      <div class="seg">
-        <button id="modeLight" class="seg-btn active">☀️ Light</button>
-        <button id="modeNight" class="seg-btn">🌙 Night</button>
-      </div>
-      <label class="muted small">Auto-refresh
-        <select id="autoSel">
-          <option value="15">15s</option>
-          <option value="30">30s</option>
-          <option value="60" selected>60s</option>
-          <option value="120">120s</option>
-        </select>
-      </label>
-    </div>
+  <div class="left">
+    <span class="badge" id="placeBadge">📍 Bangkok, TH</span>
+    <span class="badge" id="tzBadge">🕒 Asia/Bangkok</span>
   </div>
+  <div id="uiError" class="uierror" style="display:none"></div>
+      <div class="right">
+    <button id="btnRefresh" class="btn">🔄 รีเฟรช</button>
+        
+    <div class="seg">
+      <button id="unitC" class="seg-btn active">°C</button>
+      <button id="unitF" class="seg-btn">°F</button>
+    </div>
+    <div class="seg">
+      <button id="modeLight" class="seg-btn active">☀️ Light</button>
+      <button id="modeNight" class="seg-btn">🌙 Night</button>
+    </div>
+    <label class="muted small">Auto-refresh
+      <select id="autoSel">
+        <option value="15">15s</option>
+        <option value="30">30s</option>
+        <option value="60" selected>60s</option>
+        <option value="120">120s</option>
+      </select>
+    </label>
+  </div>
+</div>
 
   <main class="container">
     <section class="card current">
       <div class="headline">
         <div>
           <div class="title-th">สภาพอากาศปัจจุบัน</div>
-          <div id="updatedAt" class="updated-line muted">อัปเดตล่าสุด —</div>
+        <div id="updatedAt" class="updated-line muted">อัปเดตล่าสุด —</div>
+          <div class="subtitle"></div>
         </div>
-        <div class="status"></div>
+        <div class="status">
+          
+        </div>
       </div>
-
       <div class="row">
         <div>
           <div class="label">อัปเดตล่าสุด <span id="liveBadge" class="live">● LIVE</span></div>
@@ -73,13 +69,11 @@
           <div id="temp" class="temp">—°C</div>
         </div>
       </div>
-
       <div class="grid4">
         <div class="kv"><span class="label"><span class="emj">💧</span> ความชื้น</span><b id="rh">—%</b></div>
         <div class="kv"><span class="label"><span class="emj">🌬️</span> ลม</span><b id="wind">— m/s</b><div class="arrow" id="windDir" title="ทิศลม">↑</div></div>
         <div class="kv"><span class="label"><span class="emj">🧭</span> ความกดอากาศ</span><b id="press">— hPa</b></div>
-        <div class="kv"><span class="label"><span class="emj">☔</span> ฝน (1ชม.)</span><b id="rain">— mm</b></div>
-      </div>
+        <div class="kv"><span class="label"><span class="emj">☔</span> ฝน (1ชม.)</span><b id="rain">— mm</b></div></div>
     </section>
 
     <section class="card hourly">
