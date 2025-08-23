@@ -1,0 +1,200 @@
+:root { --pblue:#e8f3ff; --pblue-2:#bfe2ff; --ink:#0b2b4a; --muted:#5d7a97; --white:#fff; --glass-bg:rgba(255,255,255,.8); --glass-brd:#d8eaff; }
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter','Noto Sans Thai',ui-sans-serif,system-ui,Segoe UI,Roboto;background:linear-gradient(180deg,#dff0ff,#eef7ff);color:var(--ink)}
+.hero{padding:24px 16px;text-align:center;background:linear-gradient(180deg,var(--pblue-2),var(--pblue));position:sticky;top:0;z-index:1}
+.title{font-size:clamp(20px,3.2vw,34px);font-weight:800;margin-bottom:2px}
+.subtitle{color:var(--muted)}
+.container{max-width:1200px;margin:12px auto 40px;padding:0 12px;display:grid;gap:14px;grid-template-columns:1fr 1fr;grid-template-areas:"current current" "hourly daily"}
+.card{background:var(--glass-bg);backdrop-filter:blur(6px);border:1px solid var(--glass-brd);border-radius:16px;padding:12px;box-shadow:0 10px 30px rgba(70,120,200,.12)}
+.current{grid-area:current}.hourly{grid-area:hourly}.daily{grid-area:daily}
+.current .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.current .emoji{font-size:36px}.current .temp{font-size:32px;font-weight:700}
+.big{font-size:18px;font-weight:600}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.kv{background:#f7fbff;border:1px solid #e4f2ff;border-radius:10px;padding:8px;text-align:center;font-size:13px}
+.kv span{color:var(--muted);display:block}
+.hlist{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(78px,auto);gap:8px}
+.hitem{background:#f7fbff;border:1px solid #e4f2ff;border-radius:10px;padding:6px;text-align:center;font-size:13px}
+.dlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.ditem{background:#f7fbff;border:1px solid #e4f2ff;border-radius:10px;padding:8px;text-align:center;font-size:13px}
+.muted{color:var(--muted);text-align:center;font-size:12px;margin-top:4px}
+.about ul{margin:6px 0 0 18px}.about li{margin:2px 0}
+@media (max-width:900px){.container{grid-template-columns:1fr;grid-template-areas:"current" "hourly" "daily"}}
+
+/* Toolbar */
+.toolbar{max-width:1200px;margin:10px auto 6px;padding:0 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.badge{background:#eef6ff;border:1px solid #d7eaff;border-radius:999px;padding:6px 10px;font-size:12px;color:#3a5a7a}
+.btn{background:#2f6fda;color:white;border:none;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:0 6px 14px rgba(47,111,218,.22)}
+.btn:hover{filter:brightness(1.05)}
+.seg{display:inline-flex;border:1px solid #d8eaff;background:#f4f9ff;border-radius:10px;overflow:hidden;margin-left:6px}
+.seg-btn{padding:8px 12px;border:none;background:transparent;cursor:pointer}
+.seg-btn.active{background:white}
+.small{font-size:12px}
+select{padding:6px 8px;border-radius:8px;border:1px solid #cde0ff;background:white;margin-left:6px}
+
+/* Wind arrow */
+.kv .arrow{font-size:12px;opacity:.7;margin-top:4px}
+
+/* Night mode */
+body.night{background:linear-gradient(180deg,#0f2740,#102a46);color:#e8f1ff}
+body.night .hero{background:linear-gradient(180deg,#13365e,#0f2740)}
+body.night .card{background:rgba(15,39,64,.6);border-color:#1f456d;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+body.night .kv{background:#162f4a;border-color:#214b75}
+body.night .badge{background:#183a60;color:#cfe2ff;border-color:#26507a}
+body.night .btn{background:#4a8bff}
+body.night select{background:#0f2740;color:#e8f1ff;border-color:#26507a}
+
+/* Sparkline canvas */
+.spark{width:100%; display:block; margin-top:8px; background:transparent}
+
+/* Improve contrast for night mode */
+:root{ --ink-strong:#0b2b4a; --ink-night:#e8f1ff; --card-night:rgba(18,34,54,.9); --border-night:#365a86; --muted-night:#adc7e6; }
+body.night{color:var(--ink-night)}
+body.night .card{background:var(--card-night); border-color:var(--border-night)}
+body.night .kv{background:rgba(25,45,70,.9); border-color:#3d689b}
+body.night .subtitle, body.night .muted{color:var(--muted-night)}
+body.night .hitem, body.night .ditem{background:rgba(25,45,70,.9); border-color:#3d689b}
+body.night .container .label{color:var(--muted-night)}
+
+/* Animations */
+@keyframes floaty { 0%{transform:translateY(0)} 50%{transform:translateY(-4px)} 100%{transform:translateY(0)} }
+.emoji{animation: floaty 3s ease-in-out infinite}
+@keyframes blink { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.25)} }
+.btn.blinking{animation: blink .6s ease-in-out 1}
+
+.btn.alt{background:#6a7bd8}
+
+/* Warn badge */
+.badge.warn{background:#fff3cd;border-color:#ffe08a;color:#7a5d00}
+
+/* One-column layout */
+.container.onecol{grid-template-columns:1fr;grid-template-areas:"current" "hourly" "daily"}
+
+/* Refresh blink */
+@keyframes blink { 0%,100%{filter:none} 50%{filter:brightness(1.35)} }
+.btn.blip{animation:blink .5s ease}
+
+/* Animated weather icon */
+@keyframes bob { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-3px) } }
+.current .emoji{ animation:bob 3s ease-in-out infinite }
+
+/* Layout toggle */
+.container.onecol{grid-template-columns:1fr;grid-template-areas:"current" "hourly" "daily"}
+.container.twocol{grid-template-columns:1fr 1fr;grid-template-areas:"current current" "hourly daily"}
+
+/* Card hover micro-interaction */
+.card{transition:transform .18s ease, box-shadow .18s ease}
+.card:hover{transform:translateY(-2px); box-shadow:0 16px 36px rgba(70,120,200,.18)}
+
+/* Inline error banner */
+.uierror{background:#ffe8e8;border:1px solid #ffb8b8;color:#7b1f1f;padding:6px 10px;border-radius:8px;margin-right:auto}
+
+/* Divider */
+.divider{margin:6px 0;color:#567;text-align:center;font-size:12px}
+body.night .divider{color:#adc7e6}
+
+/* ===== Weather-themed backgrounds ===== */
+body.wx-clear{background:linear-gradient(180deg,#cfe9ff,#eaf6ff);}
+body.wx-cloudy{background:linear-gradient(180deg,#c7d4e3,#e6edf5);}
+body.wx-rain{background:linear-gradient(180deg,#7aa2c9,#9ec3e4);}
+body.wx-snow{background:linear-gradient(180deg,#dfefff,#f7fbff);}
+body.wx-thunder{background:linear-gradient(180deg,#273953,#3f5776);}
+body.wx-fog{background:linear-gradient(180deg,#dae2ea,#eef2f6);}
+
+/* Night variants inherit from .night + wx- classes automatically */
+
+/* ===== Lightweight precipitation FX ===== */
+#wxfx{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.fxDrop{position:absolute;top:-20px;width:2px;height:10px;background:rgba(255,255,255,.6);border-radius:1px;opacity:.8;animation:fall 1.8s linear infinite}
+@keyframes fall { to { transform: translateY(110vh); opacity:.2 } }
+.fxSnow{position:absolute;top:-10px;width:6px;height:6px;background:rgba(255,255,255,.9);border-radius:50%;opacity:.95;animation:snow 5s linear infinite}
+@keyframes snow { to { transform: translateY(105vh) translateX(10vw); opacity:.4 } }
+
+/* Elevate main content above FX */
+.hero, .container { position:relative; z-index:1 }
+
+/* ===== Skeleton Loading (B) ===== */
+.skeleton{position:relative;overflow:hidden;background:rgba(255,255,255,.15)}
+.skeleton::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);transform:translateX(-100%);animation:shine 1.2s infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.loading .kv b, .loading .hitem, .loading .ditem{color:transparent}
+.loading .kv, .loading #hourly, .loading #daily{position:relative}
+.loading .kv::before, .loading #hourly::before, .loading #daily::before{content:"";position:absolute;inset:0;border-radius:16px}
+.loading .kv::before{background:rgba(255,255,255,.08)}
+.loading #hourly::before, .loading #daily::before{background:rgba(255,255,255,.06)}
+
+/* ===== Rain Popup (C) ===== */
+.popup{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:5;background:#e6fff4;border:1px solid #93f3c4;color:#0a6; padding:8px 12px;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.popup .close{margin-left:10px;cursor:pointer}
+body.night .popup{background:#0d2e28;border-color:#1d7b6c;color:#c2ffef}
+
+/* ===== Day/Night Sky & Clouds (E + FX more) ===== */
+#wxfx{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.sun, .moon{position:absolute;top:8vh;left:10vw;width:64px;height:64px;border-radius:50%;box-shadow:0 0 40px rgba(255,214,0,.35)}
+.sun{background:radial-gradient(circle,#ffd400,#ffab00)}
+.moon{background:radial-gradient(circle,#f8f8ff,#dcdcf4); box-shadow:0 0 30px rgba(180,190,255,.35)}
+.cloud{position:absolute; top:12vh; background:rgba(255,255,255,.9); border-radius:40px; width:120px; height:36px; filter:blur(.2px); opacity:.9; animation:cloud 60s linear infinite}
+.cloud::before, .cloud::after{content:""; position:absolute; background:inherit; width:70px; height:70px; border-radius:50%}
+.cloud::before{left:10px; top:-20px}
+.cloud::after{left:50px; top:-30px}
+@keyframes cloud{ from{ transform:translateX(-20vw)} to{ transform:translateX(120vw)} }
+.star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:.8}
+
+/* Rain FX (kept lightweight) */
+.fxDrop{position:absolute;top:-20px;width:2px;height:10px;background:rgba(255,255,255,.65);border-radius:1px;opacity:.9;animation:fall 1.6s linear infinite}
+@keyframes fall { to { transform: translateY(110vh); opacity:.25 } }
+
+.hero, .container { position:relative; z-index:1 }
+
+/* Headline & live badge */
+.headline{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.dot.green{background:#16c784;box-shadow:0 0 8px rgba(22,199,132,.6)}
+.dot.red{background:#ff5b5b;box-shadow:0 0 8px rgba(255,91,91,.6)}
+.title-th{font-weight:800;font-size:20px}
+.small{font-size:12px}
+
+/* Emojis in kv labels */
+.kv span::before{margin-right:6px}
+.kv#kv-temp span::before{content:"🌡️"}
+.kv#kv-rh span::before{content:"💧"}
+.kv#kv-wind span::before{content:"🌬️"}
+.kv#kv-press span::before{content:"🧭"}
+.kv#kv-rain span::before{content:"☔"}
+
+/* Metric tile icons */
+.kv .label{display:flex; align-items:center; gap:8px; color:var(--muted, #567)}
+.kv .emj{font-size:22px; line-height:1}
+.temp{display:flex; align-items:center; gap:12px; font-size:42px}
+.temp #emoji{font-size:28px}
+
+
+/* Live badge styles */
+.live{font-weight:700;color:#16c784}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.dot.green{background:#16c784;box-shadow:0 0 8px rgba(22,199,132,.6)}
+.dot.red{background:#ff5b5b;box-shadow:0 0 8px rgba(255,91,91,.6)}
+
+/* Updated line with LIVE dot */
+.updated-line{margin:6px 0 12px 0;font-size:14px}
+.updated-line .live-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#16c784;box-shadow:0 0 8px rgba(22,199,132,.6);margin-right:6px;vertical-align:middle}
+.updated-line .live-text{color:#16c784;font-weight:700;margin-right:8px}
+
+
+.error-banner{position:sticky;top:0;z-index:5;margin:8px auto;max-width:1080px;padding:10px 12px;border-radius:10px;
+  background:#ffe9e9;border:1px solid #ffb3b3;color:#a40000;box-shadow:0 6px 16px rgba(0,0,0,.06);text-align:center}
+body.night .error-banner{background:#3a1010;border-color:#8a3b3b;color:#ffd7d7}
+
+
+.toolbar{display:flex;gap:10px;align-items:center;justify-content:center;margin:8px 0}
+.seg{display:inline-flex;border-radius:12px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.btn{padding:6px 10px;border:none;border-radius:10px;background:rgba(255,255,255,.6);backdrop-filter:blur(6px);cursor:pointer;transition:transform .05s ease, background .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn.active{background:#2c7be5;color:#fff}
+body.night .btn{background:rgba(0,0,0,.25);color:#dfe7ff}
+body.night .btn.active{background:#1b4bcc;color:#fff}
+/* refresh blink */
+.btn.blip{animation:blink .5s ease-out 1}
+@keyframes blink{50%{filter:brightness(1.35)}}
+
+#btnRefresh{color:#111 !important}
