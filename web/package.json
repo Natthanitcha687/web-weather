@@ -1,9 +1,0 @@
-{
-  "name": "weather-web",
-  "version": "1.2.0",
-  "main": "server.js",
-  "type": "module",
-  "dependencies": {
-    "express": "4.19.2"
-  }
-}

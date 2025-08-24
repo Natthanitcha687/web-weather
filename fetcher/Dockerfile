@@ -3,4 +3,4 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY fetcher.py .
-CMD ["python", "fetcher.py"]
+CMD ["python","-u","fetcher.py"]

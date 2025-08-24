@@ -1,44 +1,39 @@
 services:
   mongo:
     image: mongo:7
-    container_name: mongo
+    restart: unless-stopped
     ports: ["27017:27017"]
     volumes:
       - mongo_data:/data/db
 
   api:
     build: ./api
-    container_name: api
-    ports: ["4000:4000"]
+    restart: unless-stopped
     environment:
-      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/weather}
-      DB_NAME: ${DB_NAME:-weather}
-      PORT: "4000"
-      TZ: ${TIMEZONE:-Asia/Bangkok}
+      MONGO_URL: mongodb://mongo:27017/weather
+      PLACE_NAME: "Bangkok, TH"
+      TIMEZONE: "Asia/Bangkok"
+    ports: ["4000:4000"]
+    depends_on: [mongo]
+
+  fetcher:
+    build: ./fetcher
+    restart: "no"
+    environment:
+      MONGO_URL: mongodb://mongo:27017/weather
+      PLACE_NAME: "Bangkok, TH"
+      LAT: "13.7563"
+      LON: "100.5018"
+      TIMEZONE: "Asia/Bangkok"
+      PROVIDER_USER_AGENT: "WeatherMicro/1.0 (contact: you@example.com)"
+      RUN_ONCE: "true"
     depends_on: [mongo]
 
   web:
     build: ./web
-    container_name: web
+    restart: unless-stopped
     ports: ["3000:3000"]
-    environment:
-      API_URL: ${API_URL:-http://localhost:4000}
     depends_on: [api]
-
-  fetcher:
-    build: ./fetcher
-    container_name: fetcher
-    environment:
-      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/weather}
-      DB_NAME: ${DB_NAME:-weather}
-      LAT: ${LAT:-13.7563}
-      LON: ${LON:-100.5018}
-      PLACE_NAME: "${PLACE_NAME:-Bangkok, TH}"
-      TIMEZONE: ${TIMEZONE:-Asia/Bangkok}
-      FETCH_INTERVAL_MINUTES: ${FETCH_INTERVAL_MINUTES:-10}
-      PROVIDER_USER_AGENT: "${PROVIDER_USER_AGENT:-WeatherMicroservicesStudentProject/1.0 (contact: you@example.com)}"
-      RUN_ONCE: ${RUN_ONCE:-false}
-    depends_on: [mongo]
 
 volumes:
   mongo_data:

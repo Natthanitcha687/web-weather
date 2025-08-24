@@ -1,7 +1,5 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY package*.json ./
-RUN npm install --omit=dev
-COPY . .
-ENV NODE_ENV=production
-CMD ["node", "server.js"]
+RUN npm install -g serve
+COPY public ./public
+CMD ["serve","-s","public","-l","3000"]
