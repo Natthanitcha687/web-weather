@@ -50,21 +50,21 @@ function composeSky(kind, nowLocal) {
   orb.className = isNightLocal(nowLocal) ? 'moon' : 'sun';
   host.appendChild(orb);
 
-  // Clouds (โผล่ไวขึ้น)
+  // Clouds
   const cloudCount = (kind === 'rain' || kind === 'cloudy') ? 10 : 6;
   for (let i = 0; i < cloudCount; i++) {
     const c = document.createElement('div');
     c.className = 'cloud';
     c.style.top = (5 + Math.random() * 30) + 'vh';
     c.style.left = (-15 + Math.random() * 60) + 'vw';
-    const dur = 18 + Math.random() * 24;       // 18–42s
-    const neg = -(Math.random() * dur * 0.8);  // เริ่มกลางทาง
+    const dur = 18 + Math.random() * 24;
+    const neg = -(Math.random() * dur * 0.8);
     c.style.animationDuration = dur + 's';
     c.style.animationDelay = neg + 's';
     host.appendChild(c);
   }
 
-  // Rain
+  // Rain fx
   if (kind === 'rain') {
     const timer = setInterval(() => {
       const d = document.createElement('div');
@@ -141,31 +141,56 @@ function rerender() {
   if (_lastDaily) renderDaily(_lastDaily);
 }
 
-// ========= Fetch & render =========
+// ========= Fetch & render (ทนทานขึ้น) =========
 async function fetchAll() {
   try {
-    const [meta, current, recent, daily] = await Promise.all([
+    const [metaR, currentR, recentR, dailyR] = await Promise.allSettled([
       fetch(window.API_URL + '/api/meta').then(r => r.json()),
       fetch(window.API_URL + '/api/live/current').then(r => r.json()),
       fetch(window.API_URL + '/api/live/recent?hours=12').then(r => r.json()),
       fetch(window.API_URL + '/api/live/daily?days=7').then(r => r.json())
     ]);
 
-    if (meta.place) {
-      document.getElementById('placeHdr').textContent = meta.place;
-      document.getElementById('placeBadge').textContent = '📍 ' + meta.place;
-      document.getElementById('tzBadge').textContent = '🕒 ' + meta.tz;
+    // meta
+    if (metaR.status === 'fulfilled' && metaR.value?.place) {
+      document.getElementById('placeHdr').textContent = metaR.value.place;
+      document.getElementById('placeBadge').textContent = '📍 ' + metaR.value.place;
+      document.getElementById('tzBadge').textContent = '🕒 ' + metaR.value.tz;
     }
 
-    _lastCurrent = current; _lastRecent = recent; _lastDaily = daily;
-    renderCurrent(current);
-    renderHourly(recent);
-    renderDaily(daily);
+    // current
+    if (currentR.status === 'fulfilled') {
+      _lastCurrent = currentR.value;
+      renderCurrent(currentR.value);
+    }
+
+    // hourly
+    if (recentR.status === 'fulfilled') {
+      _lastRecent = recentR.value;
+      renderHourly(recentR.value);
+    } else {
+      const host = document.getElementById('hourly'); if (host) host.innerHTML = '';
+    }
+
+    // daily
+    if (dailyR.status === 'fulfilled') {
+      _lastDaily = dailyR.value;
+      renderDaily(dailyR.value);
+    } else {
+      const host = document.getElementById('daily'); if (host) host.innerHTML = '';
+    }
+
     startClock();
 
-    const kind = classifyWeather((current.symbol_code || '') + ' ' + (current.symbol_emoji || ''));
-    composeSky(kind.includes('rain') ? 'rain' : kind, new Date());
-    showUiError();
+    if (currentR.status === 'fulfilled') {
+      const c = currentR.value;
+      const kind = classifyWeather((c.symbol_code || '') + ' ' + (c.symbol_emoji || ''));
+      composeSky(kind.includes('rain') ? 'rain' : kind, new Date());
+    }
+
+    const allFailed = [metaR, currentR, recentR, dailyR].every(r => r.status === 'rejected');
+    showUiError(allFailed ? 'เชื่อมต่อ API ไม่ได้ • ตรวจสอบ service api และ API_URL' : '');
+
   } catch (e) {
     console.error(e);
     showUiError('เชื่อมต่อ API ไม่ได้ • ตรวจสอบ service api และ API_URL');
@@ -173,7 +198,6 @@ async function fetchAll() {
 }
 
 function renderCurrent(c) {
-  // ซ่อนบรรทัดเวลาใหญ่ (ใช้แค่ updatedAt ข้างบนแทน)
   const last = document.getElementById('lastUpdated');
   if (last) { last.textContent = ''; last.style.display = 'none'; }
 
@@ -182,28 +206,19 @@ function renderCurrent(c) {
   document.getElementById('rh').textContent = (c.relative_humidity != null ? c.relative_humidity.toFixed(1) + '%' : '—');
   document.getElementById('wind').textContent = (c.wind_speed_ms != null ? c.wind_speed_ms.toFixed(1) + ' m/s' : '—');
   document.getElementById('press').textContent = (c.pressure_hpa != null ? c.pressure_hpa.toFixed(1) + ' hPa' : '—');
-  document.getElementById('rain').textContent = (c.precip_mm != null ? c.precip_mm.toFixed(1) + ' mm' : '—');
 
   const dir = document.getElementById('windDir');
   if (dir && c.wind_from_deg != null) { dir.style.transform = `rotate(${c.wind_from_deg}deg)`; }
 }
 
-/* ========= เพิ่มฟังก์ชัน: เลือกอิโมจิรายชั่วโมงตามช่วงเวลา ========= */
-/* เงื่อนไข: 19:00–04:59 → ใช้พระจันทร์/เมฆกลางคืน, อื่น ๆ → อิโมจิเดิม */
+/* ========= อิโมจิรายชั่วโมง: กลางคืนใช้พระจันทร์ ========= */
 function isNightHour(dateLike){
   const d = new Date(dateLike);
-  // ดึงชั่วโมงตามโซนเวลาเป้าหมาย (24 ชั่วโมง)
   const hh = parseInt(new Intl.DateTimeFormat('th-TH', { hour: '2-digit', timeZone: TZ, hourCycle: 'h23' }).format(d), 10);
   return (hh >= 19 || hh < 5);
 }
-
 function pickHourlyEmoji(e, dateLike){
-  // ถ้าอยากให้ฝนมีสัญลักษณ์เฉพาะตอนกลางคืน เปลี่ยนตรงนี้ได้
-  if (isNightHour(dateLike)) {
-    // ถ้ามีฝนให้เมฆครึ้มกลางคืนก็ได้: return '☁️';
-    return '🌙';
-  }
-  // กลางวัน: ใช้ที่มาจาก API ถ้าไม่มีให้ fallback ⛅
+  if (isNightHour(dateLike)) return '🌙';
   return e.symbol_emoji || '⛅';
 }
 
@@ -213,7 +228,6 @@ function renderHourly(list) {
   host.innerHTML = '';
 
   const now = new Date();
-
   const items = (list || [])
     .map(e => ({ e, t: new Date(e.time_local || e.time_utc || '') }))
     .filter(x => !isNaN(x.t))
@@ -227,7 +241,6 @@ function renderHourly(list) {
 
   let dividerIdx = subset.findIndex(x => x.t >= now);
   if (dividerIdx === -1) dividerIdx = subset.length;
-  if (dividerIdx === 0) dividerIdx = 0;
 
   subset.forEach((row, i) => {
     if (i === dividerIdx) {
@@ -238,15 +251,13 @@ function renderHourly(list) {
     }
 
     const e = row.e;
-    const emoji = pickHourlyEmoji(e, row.t);       // ← ใช้ emoji ตามเวลาที่นี่
-    const rain = (e.precip_mm != null ? Number(e.precip_mm).toFixed(1) : '0.0');
+    const emoji = pickHourlyEmoji(e, row.t);
 
     const tile = document.createElement('div');
     tile.className = 'tile';
     tile.innerHTML = `
       <div style="font-size:22px">${emoji}</div>
       <div><b>${formatTemp(e.air_temperature)}</b></div>
-      <div class="muted small">🌧 ${rain} mm</div>
       <div class="muted">${timeHM(e.time_local || e.time_utc || '')}</div>
     `;
     host.appendChild(tile);
@@ -268,7 +279,6 @@ function renderDaily(list) {
     const dt = new Date(d.date + 'T00:00:00+07:00');
     tile.innerHTML = `
       <div class="muted">${dt.toLocaleDateString('th-TH', { weekday: 'short', day: '2-digit', month: 'short' })}</div>
-      <div class="muted small">ฝน ${Number(d.rain || 0).toFixed(1)} mm</div>
       <div><b>${formatTemp(d.tmin)} ~ ${formatTemp(d.tmax)}</b></div>
     `;
     host.appendChild(tile);
