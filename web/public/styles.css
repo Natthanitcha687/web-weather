@@ -168,3 +168,33 @@ body.night .title{ color:var(--ink); }
   .emoji{ font-size: 36px; }
   .temp{ font-size: 32px; }
 }
+/* ========== WEEKLY COLOR TOKENS ========== */
+/* 0=Sun, 1=Mon, ... 6=Sat */
+.w0 { --wk:#ff6b6b;  --wkbg:rgba(255,107,107,.08); }   /* Sun – red   */
+.w1 { --wk:#ffd166;  --wkbg:rgba(255,209,102,.10); }   /* Mon – yellow*/
+.w2 { --wk:#ff9ed1;  --wkbg:rgba(255,158,209,.10); }   /* Tue – pink  */
+.w3 { --wk:#63d48f;  --wkbg:rgba(99,212,143,.10); }    /* Wed – green */
+.w4 { --wk:#ffad61;  --wkbg:rgba(255,173,97,.10); }    /* Thu – orange*/
+.w5 { --wk:#6aa6ff;  --wkbg:rgba(106,166,255,.10); }   /* Fri – blue  */
+.w6 { --wk:#b28dff;  --wkbg:rgba(178,141,255,.12); }   /* Sat – purple*/
+
+/* การ์ดรายสัปดาห์ให้รองรับสี */
+.tile.day-tile{
+  position:relative;
+  border-color: var(--wk, var(--ring));
+  background: var(--wkbg, rgba(255,255,255,.6));
+}
+
+/* แถบสีบาง ๆ ด้านบน เพิ่มความพรีเมียม */
+.tile.day-tile::after{
+  content:"";
+  position:absolute;
+  left:12px; right:12px; top:8px; height:4px;
+  border-radius:999px;
+  background: var(--wk, transparent);
+  opacity:.55;
+}
+
+/* จัดตัวอักษรในการ์ดรายสัปดาห์ให้บาลานซ์ */
+.day-title{ font-weight:600; }
+.day-range{ margin-top:6px; }

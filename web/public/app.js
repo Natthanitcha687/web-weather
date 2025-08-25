@@ -274,16 +274,27 @@ function renderHourly(list) {
 function renderDaily(list) {
   const host = document.getElementById('daily'); if (!host) return;
   host.innerHTML = '';
+
   (list || []).forEach(d => {
-    const tile = document.createElement('div'); tile.className = 'tile';
     const dt = new Date(d.date + 'T00:00:00+07:00');
+    const w = dt.getDay();   // 0=Sun,1=Mon,...,6=Sat
+
+    const tile = document.createElement('div');
+    tile.className = `tile day-tile w${w}`;
+
+    const dayLabel = dt.toLocaleDateString('th-TH', {
+      weekday: 'short', day: '2-digit', month: 'short'
+    });
+
     tile.innerHTML = `
-      <div class="muted">${dt.toLocaleDateString('th-TH', { weekday: 'short', day: '2-digit', month: 'short' })}</div>
-      <div><b>${formatTemp(d.tmin)} ~ ${formatTemp(d.tmax)}</b></div>
+      <div class="muted day-title">${dayLabel}</div>
+      <div class="day-range"><b>${formatTemp(d.tmin)} ~ ${formatTemp(d.tmax)}</b></div>
     `;
+
     host.appendChild(tile);
   });
 }
+
 
 // Boot
 function boot() { initControls(); fetchAll(); setTimeout(fetchAll, 250); }
