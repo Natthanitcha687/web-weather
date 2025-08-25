@@ -188,6 +188,25 @@ function renderCurrent(c) {
   if (dir && c.wind_from_deg != null) { dir.style.transform = `rotate(${c.wind_from_deg}deg)`; }
 }
 
+/* ========= เพิ่มฟังก์ชัน: เลือกอิโมจิรายชั่วโมงตามช่วงเวลา ========= */
+/* เงื่อนไข: 19:00–04:59 → ใช้พระจันทร์/เมฆกลางคืน, อื่น ๆ → อิโมจิเดิม */
+function isNightHour(dateLike){
+  const d = new Date(dateLike);
+  // ดึงชั่วโมงตามโซนเวลาเป้าหมาย (24 ชั่วโมง)
+  const hh = parseInt(new Intl.DateTimeFormat('th-TH', { hour: '2-digit', timeZone: TZ, hourCycle: 'h23' }).format(d), 10);
+  return (hh >= 19 || hh < 5);
+}
+
+function pickHourlyEmoji(e, dateLike){
+  // ถ้าอยากให้ฝนมีสัญลักษณ์เฉพาะตอนกลางคืน เปลี่ยนตรงนี้ได้
+  if (isNightHour(dateLike)) {
+    // ถ้ามีฝนให้เมฆครึ้มกลางคืนก็ได้: return '☁️';
+    return '🌙';
+  }
+  // กลางวัน: ใช้ที่มาจาก API ถ้าไม่มีให้ fallback ⛅
+  return e.symbol_emoji || '⛅';
+}
+
 // === Hourly ===
 function renderHourly(list) {
   const host = document.getElementById('hourly'); if (!host) return;
@@ -219,11 +238,13 @@ function renderHourly(list) {
     }
 
     const e = row.e;
+    const emoji = pickHourlyEmoji(e, row.t);       // ← ใช้ emoji ตามเวลาที่นี่
+    const rain = (e.precip_mm != null ? Number(e.precip_mm).toFixed(1) : '0.0');
+
     const tile = document.createElement('div');
     tile.className = 'tile';
-    const rain = (e.precip_mm != null ? Number(e.precip_mm).toFixed(1) : '0.0');
     tile.innerHTML = `
-      <div style="font-size:22px">${e.symbol_emoji || '⛅'}</div>
+      <div style="font-size:22px">${emoji}</div>
       <div><b>${formatTemp(e.air_temperature)}</b></div>
       <div class="muted small">🌧 ${rain} mm</div>
       <div class="muted">${timeHM(e.time_local || e.time_utc || '')}</div>
