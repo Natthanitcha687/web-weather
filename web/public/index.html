@@ -13,6 +13,7 @@
 </head>
 <body>
   <div id="wxfx" aria-hidden="true"></div>
+
   <header class="hero">
     <div class="title">🌤️ สภาพอากาศ (TH)</div>
     <div class="subtitle"><span id="placeHdr">Bangkok, TH</span></div>
@@ -49,11 +50,15 @@
     <section class="card current">
       <div class="headline">
         <div>
-          <div class="title-th">สภาพอากาศปัจจุบัน <span id="liveBadge" class="live">● LIVE</span></div>
+          <!-- LIVE badge + เวลาอัปเดตล่าสุด (เก็บไว้) -->
+          <div class="title-th">สภาพอากาศปัจจุบัน</div>
           <div id="updatedAt" class="updated-line muted">อัปเดตล่าสุด —</div>
+
         </div>
       </div>
-      <div class="row">
+
+      <!-- ลบบล็อกนี้ออกทั้งก้อน
+      <div class="">
         <div>
           <div class="label">อัปเดตล่าสุด</div>
           <div id="lastUpdated" class="big">—</div>
@@ -63,6 +68,14 @@
           <div id="temp" class="temp">—°C</div>
         </div>
       </div>
+      -->
+
+      <!-- ย้ายเฉพาะ temp/emoji ขึ้นมาแสดงต่อจาก headline -->
+      <div class="currentTemp">
+        <div id="emoji" class="emoji">☀️</div>
+        <div id="temp" class="temp">—°C</div>
+      </div>
+
       <div class="grid4">
         <div class="kv"><span class="label"><span class="emj">💧</span> ความชื้น</span><b id="rh">—%</b></div>
         <div class="kv"><span class="label"><span class="emj">🌬️</span> ลม</span><b id="wind">— m/s</b><div class="arrow" id="windDir" title="ทิศลม">↑</div></div>

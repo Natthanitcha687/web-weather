@@ -173,7 +173,7 @@ async function fetchAll() {
 }
 
 function renderCurrent(c) {
-  // ซ่อนบรรทัดเวลาใหญ่
+  // ซ่อนบรรทัดเวลาใหญ่ (ใช้แค่ updatedAt ข้างบนแทน)
   const last = document.getElementById('lastUpdated');
   if (last) { last.textContent = ''; last.style.display = 'none'; }
 
@@ -188,34 +188,29 @@ function renderCurrent(c) {
   if (dir && c.wind_from_deg != null) { dir.style.transform = `rotate(${c.wind_from_deg}deg)`; }
 }
 
-// === Hourly: 12 ช่อง + วาง "— ถัดไป —" ระหว่างอดีต/อนาคต ===
+// === Hourly ===
 function renderHourly(list) {
   const host = document.getElementById('hourly'); if (!host) return;
   host.innerHTML = '';
 
   const now = new Date();
 
-  // เตรียม/เรียงเวลาเป็นลิสต์ที่เปรียบเทียบได้
   const items = (list || [])
     .map(e => ({ e, t: new Date(e.time_local || e.time_utc || '') }))
     .filter(x => !isNaN(x.t))
     .sort((a, b) => a.t - b.t);
 
-  // index ของชั่วโมงแรกที่ "อนาคตหรือเท่ากับตอนนี้"
   const firstFuture = items.findIndex(x => x.t >= now);
   const pivot = (firstFuture === -1) ? items.length : firstFuture;
 
-  // ให้มุมมองหน้าจอมีประมาณอดีต 6 + อนาคต 6 รวม 12
   let start = Math.max(0, pivot - 6);
   const subset = items.slice(start, start + 12);
 
-  // หา index ภายใน subset ที่เป็นเส้นแบ่งอดีต/อนาคต
   let dividerIdx = subset.findIndex(x => x.t >= now);
-  if (dividerIdx === -1) dividerIdx = subset.length; // ทั้งหมดเป็นอดีต -> ใส่ท้าย
-  if (dividerIdx === 0) dividerIdx = 0;             // ทั้งหมดเป็นอนาคต -> ใส่หน้า
+  if (dividerIdx === -1) dividerIdx = subset.length;
+  if (dividerIdx === 0) dividerIdx = 0;
 
   subset.forEach((row, i) => {
-    // แทรก "— ถัดไป —" ก่อนเรนเดอร์รายการอนาคตอันแรก
     if (i === dividerIdx) {
       const next = document.createElement('div');
       next.className = 'tile next';
@@ -236,7 +231,6 @@ function renderHourly(list) {
     host.appendChild(tile);
   });
 
-  // กรณี divider ต้องอยู่ท้ายสุด (เมื่อไม่มีอนาคตใน subset)
   if (dividerIdx === subset.length) {
     const next = document.createElement('div');
     next.className = 'tile next';
