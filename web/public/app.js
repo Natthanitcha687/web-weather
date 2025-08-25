@@ -146,9 +146,9 @@ async function fetchAll() {
   try {
     const [meta, current, recent, daily] = await Promise.all([
       fetch(window.API_URL + '/api/meta').then(r => r.json()),
-      fetch(window.API_URL + '/api/current').then(r => r.json()),
-      fetch(window.API_URL + '/api/readings/recent?hours=12').then(r => r.json()),
-      fetch(window.API_URL + '/api/daily?days=7').then(r => r.json())
+      fetch(window.API_URL + '/api/live/current').then(r => r.json()),
+      fetch(window.API_URL + '/api/live/recent?hours=12').then(r => r.json()),
+      fetch(window.API_URL + '/api/live/daily?days=7').then(r => r.json())
     ]);
 
     if (meta.place) {
