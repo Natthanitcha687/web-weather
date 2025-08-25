@@ -17,15 +17,12 @@
 <body>
   <div id="wxfx" aria-hidden="true"></div>
 
-  <!-- ใส่กรอบหน้าให้ยืดหยุ่นบนมือถือ/เดสก์ท็อป -->
   <div class="page">
-
     <header class="hero">
       <div class="title">🌤️ สภาพอากาศ (TH)</div>
       <div class="subtitle"><span id="placeHdr">Bangkok, TH</span></div>
     </header>
 
-    <!-- ให้ toolbar wrap ได้บนจอแคบ -->
     <div class="toolbar topbar">
       <div class="left chips">
         <span class="badge chip" id="placeBadge">📍 Bangkok, TH</span>
@@ -58,9 +55,7 @@
       </div>
     </div>
 
-    <!-- ใช้ stack ให้การ์ดเว้นระยะสม่ำเสมอ -->
     <main class="container stack">
-
       <section class="card current now">
         <div class="headline">
           <div>
@@ -69,13 +64,11 @@
           </div>
         </div>
 
-        <!-- อุณหภูมิใหญ่จัดแยกบรรทัด -->
         <div class="currentTemp">
           <div id="emoji" class="emoji">☀️</div>
           <div id="temp" class="temp">—°C</div>
         </div>
 
-        <!-- ใส่คลาส .metrics (คง .grid4 เดิมไว้ด้วย) เพื่อให้เป็น grid ยืดหยุ่น -->
         <div class="grid4 metrics">
           <div class="kv"><span class="label"><span class="emj">💧</span> ความชื้น</span><b id="rh">—%</b></div>
           <div class="kv">
@@ -84,19 +77,17 @@
             <div class="arrow" id="windDir" title="ทิศลม">↑</div>
           </div>
           <div class="kv"><span class="label"><span class="emj">🧭</span> ความกดอากาศ</span><b id="press">— hPa</b></div>
-          <div class="kv"><span class="label"><span class="emj">☔</span> ฝน (1ชม.)</span><b id="rain">— mm</b></div>
+          <!-- ❌ ลบกรอบฝนออก -->
         </div>
       </section>
 
       <section class="card hourly">
         <h3>⏱️ รายชั่วโมง (12 ชม.)</h3>
-        <!-- เติมคลาส .hours-grid แต่คง id เดิมให้ JS ใช้ -->
         <div id="hourly" class="hlist hours-grid"></div>
       </section>
 
       <section class="card daily">
         <h3>📅 รายสัปดาห์</h3>
-        <!-- เติมคลาส .days-grid แต่คง id เดิมให้ JS ใช้ -->
         <div id="daily" class="dlist days-grid"></div>
       </section>
 
@@ -104,7 +95,6 @@
         แหล่งข้อมูล: OPEN-METEO · ผู้จัดทำ: NATTHANITCHA & SRONSAWAN · Timezone: Asia/Bangkok
       </footer>
     </main>
-
   </div>
 </body>
 </html>
