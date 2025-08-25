@@ -4,9 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>🌤️ สภาพอากาศ (TH)</title>
+
+  <!-- fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css" />
   <script src="config.js" defer></script>
   <script src="app.js" defer></script>
@@ -14,89 +17,94 @@
 <body>
   <div id="wxfx" aria-hidden="true"></div>
 
-  <header class="hero">
-    <div class="title">🌤️ สภาพอากาศ (TH)</div>
-    <div class="subtitle"><span id="placeHdr">Bangkok, TH</span></div>
-  </header>
+  <!-- ใส่กรอบหน้าให้ยืดหยุ่นบนมือถือ/เดสก์ท็อป -->
+  <div class="page">
 
-  <div class="toolbar">
-    <div class="left">
-      <span class="badge" id="placeBadge">📍 Bangkok, TH</span>
-      <span class="badge" id="tzBadge">🕒 Asia/Bangkok</span>
-    </div>
-    <div id="uiError" class="uierror" style="display:none"></div>
-    <div class="right">
-      <button id="btnRefresh" class="btn"><span class="spin-icon">🔄</span> <span class="lbl">Refresh</span></button>
-      <div class="seg">
-        <button id="unitC" class="seg-btn active">°C</button>
-        <button id="unitF" class="seg-btn">°F</button>
+    <header class="hero">
+      <div class="title">🌤️ สภาพอากาศ (TH)</div>
+      <div class="subtitle"><span id="placeHdr">Bangkok, TH</span></div>
+    </header>
+
+    <!-- ให้ toolbar wrap ได้บนจอแคบ -->
+    <div class="toolbar topbar">
+      <div class="left chips">
+        <span class="badge chip" id="placeBadge">📍 Bangkok, TH</span>
+        <span class="badge chip" id="tzBadge">🕒 Asia/Bangkok</span>
       </div>
-      <div class="seg">
-        <button id="modeLight" class="seg-btn active">☀️ Light</button>
-        <button id="modeNight" class="seg-btn">🌙 Night</button>
-      </div>
-      <label class="muted small">Auto-refresh
-        <select id="autoSel">
-          <option value="0">Off</option>
-          <option value="15">15s</option>
-          <option value="30">30s</option>
-          <option value="60" selected>60s</option>
-        </select>
-      </label>
-    </div>
-  </div>
 
-  <main class="container">
-    <section class="card current">
-      <div class="headline">
-        <div>
-          <!-- LIVE badge + เวลาอัปเดตล่าสุด (เก็บไว้) -->
-          <div class="title-th">สภาพอากาศปัจจุบัน</div>
-          <div id="updatedAt" class="updated-line muted">อัปเดตล่าสุด —</div>
+      <div id="uiError" class="uierror" style="display:none"></div>
 
+      <div class="right controls">
+        <button id="btnRefresh" class="btn"><span class="spin-icon">🔄</span> <span class="lbl">Refresh</span></button>
+
+        <div class="seg">
+          <button id="unitC" class="seg-btn active">°C</button>
+          <button id="unitF" class="seg-btn">°F</button>
         </div>
-      </div>
 
-      <!-- ลบบล็อกนี้ออกทั้งก้อน
-      <div class="">
-        <div>
-          <div class="label">อัปเดตล่าสุด</div>
-          <div id="lastUpdated" class="big">—</div>
+        <div class="seg">
+          <button id="modeLight" class="seg-btn active">☀️ Light</button>
+          <button id="modeNight" class="seg-btn">🌙 Night</button>
         </div>
+
+        <label class="muted small">Auto-refresh
+          <select id="autoSel">
+            <option value="0">Off</option>
+            <option value="15">15s</option>
+            <option value="30">30s</option>
+            <option value="60" selected>60s</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <!-- ใช้ stack ให้การ์ดเว้นระยะสม่ำเสมอ -->
+    <main class="container stack">
+
+      <section class="card current now">
+        <div class="headline">
+          <div>
+            <div class="title-th">สภาพอากาศปัจจุบัน</div>
+            <div id="updatedAt" class="updated-line muted">อัปเดตล่าสุด —</div>
+          </div>
+        </div>
+
+        <!-- อุณหภูมิใหญ่จัดแยกบรรทัด -->
         <div class="currentTemp">
           <div id="emoji" class="emoji">☀️</div>
           <div id="temp" class="temp">—°C</div>
         </div>
-      </div>
-      -->
 
-      <!-- ย้ายเฉพาะ temp/emoji ขึ้นมาแสดงต่อจาก headline -->
-      <div class="currentTemp">
-        <div id="emoji" class="emoji">☀️</div>
-        <div id="temp" class="temp">—°C</div>
-      </div>
+        <!-- ใส่คลาส .metrics (คง .grid4 เดิมไว้ด้วย) เพื่อให้เป็น grid ยืดหยุ่น -->
+        <div class="grid4 metrics">
+          <div class="kv"><span class="label"><span class="emj">💧</span> ความชื้น</span><b id="rh">—%</b></div>
+          <div class="kv">
+            <span class="label"><span class="emj">🌬️</span> ลม</span>
+            <b id="wind">— m/s</b>
+            <div class="arrow" id="windDir" title="ทิศลม">↑</div>
+          </div>
+          <div class="kv"><span class="label"><span class="emj">🧭</span> ความกดอากาศ</span><b id="press">— hPa</b></div>
+          <div class="kv"><span class="label"><span class="emj">☔</span> ฝน (1ชม.)</span><b id="rain">— mm</b></div>
+        </div>
+      </section>
 
-      <div class="grid4">
-        <div class="kv"><span class="label"><span class="emj">💧</span> ความชื้น</span><b id="rh">—%</b></div>
-        <div class="kv"><span class="label"><span class="emj">🌬️</span> ลม</span><b id="wind">— m/s</b><div class="arrow" id="windDir" title="ทิศลม">↑</div></div>
-        <div class="kv"><span class="label"><span class="emj">🧭</span> ความกดอากาศ</span><b id="press">— hPa</b></div>
-        <div class="kv"><span class="label"><span class="emj">☔</span> ฝน (1ชม.)</span><b id="rain">— mm</b></div>
-      </div>
-    </section>
+      <section class="card hourly">
+        <h3>⏱️ รายชั่วโมง (12 ชม.)</h3>
+        <!-- เติมคลาส .hours-grid แต่คง id เดิมให้ JS ใช้ -->
+        <div id="hourly" class="hlist hours-grid"></div>
+      </section>
 
-    <section class="card hourly">
-      <h3>⏱️ รายชั่วโมง (12 ชม.)</h3>
-      <div id="hourly" class="hlist"></div>
-    </section>
+      <section class="card daily">
+        <h3>📅 รายสัปดาห์</h3>
+        <!-- เติมคลาส .days-grid แต่คง id เดิมให้ JS ใช้ -->
+        <div id="daily" class="dlist days-grid"></div>
+      </section>
 
-    <section class="card daily">
-      <h3>📅 รายสัปดาห์ </h3>
-      <div id="daily" class="dlist"></div>
-    </section>
+      <footer class="muted">
+        แหล่งข้อมูล: OPEN-METEO · ผู้จัดทำ: NATTHANITCHA & SRONSAWAN · Timezone: Asia/Bangkok
+      </footer>
+    </main>
 
-    <footer class="muted">
-      แหล่งข้อมูล: OPEN-METEO · ผู้จัดทำ: NATTHANITCHA & SRONSAWAN · Timezone: Asia/Bangkok
-    </footer>
-  </main>
+  </div>
 </body>
 </html>

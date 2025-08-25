@@ -5,30 +5,43 @@
 
 /* NIGHT – คอนทราสต์สูงขึ้น อ่านง่ายกว่าเดิม */
 body.night{
-  --bg:#0b1830;      /* เข้มขึ้นเล็กน้อย */
-  --panel:#0f2442;   /* แผงเข้มชัด */
-  --ink:#eaf2ff;     /* ตัวหนังสือหลักสว่าง */
-  --muted:#c8dcff;   /* ป้ายกำกับ/ตัวอธิบายสว่างขึ้น */
+  --bg:#0b1830;
+  --panel:#0f2442;
+  --ink:#eaf2ff;
+  --muted:#c8dcff;
   --accent:#7cc2ff;
   --ring:#1f3b5e;
 }
 
-*{box-sizing:border-box}
+*{ box-sizing:border-box; }
+
+html, body{ height:100%; }
+
 body{
-  margin:0; font-family:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  margin:0;
+  font-family:"Inter","Noto Sans Thai",system-ui,sans-serif;
   background: radial-gradient(1200px 400px at 50% -50%, #fff, var(--bg));
   color:var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ====== PAGE WRAPPER (ช่วยให้เว้นขอบสวย/ยืดหยุ่น) ====== */
+.page{
+  max-width:1200px;
+  margin:0 auto;
+  padding: clamp(12px, 2.5vw, 24px);
 }
 
 /* ====== HERO ====== */
-.hero{ text-align:center; padding:28px 16px 12px;}
-.hero .title{ font-size:40px; font-weight:800 }
-.hero .subtitle{ color:var(--muted); margin-top:6px;}
+.hero{ text-align:center; padding: clamp(20px, 3vw, 28px) 16px 12px; }
+.hero .title{ font-size: clamp(26px, 4.2vw, 40px); font-weight:800 }
+.hero .subtitle{ color:var(--muted); margin-top:6px; }
 
 /* ====== TOOLBAR ====== */
-.toolbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:8px 16px; flex-wrap:wrap}
+.toolbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:8px 16px; flex-wrap:wrap; }
 .badge{ background:var(--panel); border:1px solid var(--ring); border-radius:999px; padding:6px 10px; margin-right:6px; }
-.right{ display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.right{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .btn{ background:#fff; border:1px solid var(--ring); border-radius:10px; padding:8px 12px; cursor:pointer; color:#000 }
 .btn.blip .spin-icon{ animation:spin 0.5s linear 1 }
 @keyframes spin{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
@@ -38,26 +51,63 @@ body{
 
 /* ====== LAYOUT ====== */
 .container{ max-width:1100px; margin:0 auto; padding:12px; }
-.card{ background:var(--panel); border:1px solid var(--ring); border-radius:18px; padding:16px; margin:12px auto; box-shadow:0 6px 18px rgba(0,0,0,.05); }
-.current .row{ display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap }
-.current .big{ font-size:20px; color:var(--muted)}
-.currentTemp{ display:flex; align-items:center; gap:8px }
-.emoji{ font-size:42px }
-.temp{ font-size:36px; font-weight:800}
-.grid4{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:12px }
-.kv{ background:rgba(255,255,255,.6); border:1px solid var(--ring); border-radius:12px; padding:12px 14px }
-.label{ color:var(--muted); font-size:14px}
+.card{
+  background:var(--panel);
+  border:1px solid var(--ring);
+  border-radius:18px;
+  padding: clamp(12px, 2vw, 16px);
+  margin:12px auto;
+  box-shadow:0 6px 18px rgba(0,0,0,.05);
+}
+
+/* headline ปรับ margin ให้กระชับ */
+.headline{ display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; }
+.current .title-th{ font-weight:700; font-size: clamp(16px, 2.4vw, 20px); }
+.updated-line{ margin-top:6px; }
+
+/* current temp ใหญ่แต่อย่าเบียดจอเล็ก */
+.currentTemp{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.emoji{ font-size: clamp(34px, 5vw, 42px); }
+.temp{ font-size: clamp(30px, 6vw, 36px); font-weight:800; white-space:nowrap; }
+
+/* กล่องคีย์ค่า 4 ช่อง → ทำเป็นกริดยืดหยุ่น */
+.grid4.metrics{
+  display:grid;
+  gap:12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-top:12px;
+}
+.kv{
+  background: rgba(255,255,255,.6);
+  border:1px solid var(--ring);
+  border-radius:12px;
+  padding:12px 14px;
+  min-width:0;              /* กันล้น */
+}
+.label{ color:var(--muted); font-size:14px; }
 .arrow{ margin-top:6px; opacity:.7 }
-.hlist,.dlist{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px }
-.tile{ background:rgba(255,255,255,.6); border:1px solid var(--ring); border-radius:12px; padding:12px }
-.muted{ color:var(--muted)}
-.live{ color:#12c05b; font-weight:700; margin-left:4px}
-.updated-line{ margin-top:8px; }
+
+/* รายชั่วโมง/รายสัปดาห์ → กริดยืดหยุ่น */
+.hlist, .dlist, .hours-grid, .days-grid{
+  display:grid;
+  gap:12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+.tile{
+  background: rgba(255,255,255,.6);
+  border:1px solid var(--ring);
+  border-radius:12px;
+  padding:12px;
+  min-width:0;
+}
+
+.muted{ color:var(--muted) }
+.live{ color:#12c05b; font-weight:700; margin-left:4px }
 
 /* — ซ่อนบรรทัดเวลาขนาดใหญ่ (02 ก.ย. 07:00) — */
 #lastUpdated{ display:none !important; }
 
-/* NIGHT – การ์ดให้โปร่งใสน้อยลง, ตัวหนังสือสว่าง */
+/* NIGHT – ปรับคอนทราสต์ให้เหมาะ */
 body.night .kv,
 body.night .tile{ background:rgba(255,255,255,0.10); border-color:var(--ring); }
 body.night .label{ color:var(--muted); }
@@ -106,3 +156,33 @@ body.night .title{ color:var(--ink); }
 
 /* ====== ERROR ====== */
 .uierror{ background:#ffefef; color:#8a0020; border:1px solid #ffd7d7; padding:6px 10px; border-radius:8px }
+
+/* ====== BREAKPOINTS (จูนเพิ่มให้พอดีกับมือถือ) ====== */
+
+/* ≤ 1024px: ข้อมูลปัจจุบันจาก 4 คอลัมน์ → 2 โดยอัตโนมัติ (auto-fit ช่วยอยู่แล้ว)
+   แต่ลด min-width ให้ยืดหยุ่นมากขึ้น */
+@media (max-width: 1024px){
+  .grid4.metrics{
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+}
+
+/* ≤ 768px: padding/ฟอนต์กะทัดรัดขึ้น */
+@media (max-width: 768px){
+  .page{ padding:16px; }
+  .container{ padding:10px; }
+  .hero{ padding-top: 18px; }
+
+  .hlist, .dlist, .hours-grid, .days-grid{
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+}
+
+/* ≤ 480px: การ์ดคีย์ค่าปัจจุบันแสดงเป็นคอลัมน์เดียว โล่งอ่านง่าย */
+@media (max-width: 480px){
+  .grid4.metrics{
+    grid-template-columns: 1fr;
+  }
+  .emoji{ font-size: 36px; }
+  .temp{ font-size: 32px; }
+}
