@@ -13,16 +13,26 @@
   <!-- Styles -->
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Config ก่อน เพื่อให้ app.js ใช้ API_URL ได้ -->
+  <!-- ต้องโหลด config ก่อน เพื่อให้ app.js ใช้ API_URL ได้ -->
   <script src="config.js" defer></script>
 
-  <!-- Chart.js ต้องมาก่อน app.js (ทั้งคู่ defer แต่ลำดับจะตามการประกาศ) -->
+  <!-- Chart.js (อยู่ก่อน app.js) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
-  <!-- App หลัก -->
+  <!-- แอปหลัก -->
   <script src="app.js" defer></script>
 </head>
 <body>
+  <!-- ================= Loading Overlay ================= -->
+  <div id="loading" class="loading" aria-live="polite" aria-busy="true">
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="progress-wrap" aria-hidden="true">
+      <div id="progressBar" class="progress-bar"></div>
+    </div>
+    <div class="msg">กำลังโหลดนะ…</div>
+  </div>
+  <!-- =================================================== -->
+
   <!-- เลเยอร์เอฟเฟกต์ท้องฟ้า -->
   <div id="wxfx" aria-hidden="true"></div>
 
@@ -124,7 +134,7 @@
       </section>
 
       <footer class="muted">
-        แหล่งข้อมูล: OPEN-METEO · ผู้จัดทำ: NATTHANITCHA KITICHAYACHOT &amp; SRONSAWAN JANTASUWANNO· Timezone: Asia/Bangkok
+        แหล่งข้อมูล: OPEN-METEO · ผู้จัดทำ: NATTHANITCHA KITICHAYACHOT &amp; SRONSAWAN JANTASUWANNO · Timezone: Asia/Bangkok
       </footer>
     </main>
   </div>

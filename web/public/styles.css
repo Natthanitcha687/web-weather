@@ -132,16 +132,14 @@ body.night .title{ color:var(--ink); }
 .sun{ background:radial-gradient(#fffca8,#ffd34d)}
 .moon{ background:radial-gradient(#fff,#cfd8ff); box-shadow:0 0 30px rgba(180,200,255,.5)}
 
-/* ทำให้เมฆชัดขึ้น “เฉพาะ Light mode” */
+/* ทำให้เมฆชัดขึ้นเฉพาะ Light mode */
 body:not(.night) .cloud{
   opacity:.65;
-  filter: blur(.6px);   /* ลดความเบลอเล็กน้อย */
-  box-shadow: 0 8px 24px rgba(255,255,255,.18) inset; /* ไฮไลต์ในก้อนเมฆเบา ๆ */
+  filter: blur(.6px);
+  box-shadow: 0 8px 24px rgba(255,255,255,.18) inset;
 }
 body:not(.night) .cloud::before,
-body:not(.night) .cloud::after{
-  background:#ffffff;   /* ขาวจัดขึ้นนิด */
-}
+body:not(.night) .cloud::after{ background:#ffffff; }
 
 .fxDrop{ position:absolute; top:-5vh; width:2px; height:18px; background:#73a7ff; opacity:.55; animation:fall linear 1.1s }
 @keyframes fall{ to{ transform:translateY(105vh) } }
@@ -162,17 +160,13 @@ body:not(.night) .cloud::after{
 
 /* ===== BREAKPOINTS ===== */
 @media (max-width: 1024px){
-  .grid4.metrics{
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  }
+  .grid4.metrics{ grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 }
 @media (max-width: 768px){
   .page{ padding:16px; }
   .container{ padding:10px; }
   .hero{ padding-top: 18px; }
-  .hlist, .dlist, .hours-grid, .days-grid{
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  }
+  .hlist, .dlist, .hours-grid, .days-grid{ grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
 }
 @media (max-width: 480px){
   .grid4.metrics{ grid-template-columns: 1fr; }
@@ -181,14 +175,13 @@ body:not(.night) .cloud::after{
 }
 
 /* ========== WEEKLY COLOR TOKENS ========== */
-/* 0=Sun, 1=Mon, ... 6=Sat */
-.w0 { --wk:#ff6b6b;  --wkbg:rgba(255,107,107,.08); }   /* Sun – red   */
-.w1 { --wk:#ffd166;  --wkbg:rgba(255,209,102,.10); }   /* Mon – yellow*/
-.w2 { --wk:#ff9ed1;  --wkbg:rgba(255,158,209,.10); }   /* Tue – pink  */
-.w3 { --wk:#63d48f;  --wkbg:rgba(99,212,143,.10); }    /* Wed – green */
-.w4 { --wk:#ffad61;  --wkbg:rgba(255,173,97,.10); }    /* Thu – orange*/
-.w5 { --wk:#6aa6ff;  --wkbg:rgba(106,166,255,.10); }   /* Fri – blue  */
-.w6 { --wk:#b28dff;  --wkbg:rgba(178,141,255,.12); }   /* Sat – purple*/
+.w0 { --wk:#ff6b6b;  --wkbg:rgba(255,107,107,.08); }  /* Sun – red   */
+.w1 { --wk:#ffd166;  --wkbg:rgba(255,209,102,.10); }  /* Mon – yellow*/
+.w2 { --wk:#ff9ed1;  --wkbg:rgba(255,158,209,.10); }  /* Tue – pink  */
+.w3 { --wk:#63d48f;  --wkbg:rgba(99,212,143,.10); }   /* Wed – green */
+.w4 { --wk:#ffad61;  --wkbg:rgba(255,173,97,.10); }   /* Thu – orange*/
+.w5 { --wk:#6aa6ff;  --wkbg:rgba(106,166,255,.10); }  /* Fri – blue  */
+.w6 { --wk:#b28dff;  --wkbg:rgba(178,141,255,.12); }  /* Sat – purple*/
 
 /* การ์ดรายสัปดาห์ให้รองรับสี */
 .tile.day-tile{
@@ -196,28 +189,62 @@ body:not(.night) .cloud::after{
   border-color: var(--wk, var(--ring));
   background: var(--wkbg, rgba(255,255,255,.6));
 }
-
-/* แถบสีบาง ๆ ด้านบน เพิ่มความพรีเมียม */
 .tile.day-tile::after{
   content:"";
-  position:absolute;
-  left:12px; right:12px; top:8px; height:4px;
-  border-radius:999px;
-  background: var(--wk, transparent);
-  opacity:.55;
+  position:absolute; left:12px; right:12px; top:8px; height:4px;
+  border-radius:999px; background: var(--wk, transparent); opacity:.55;
 }
-
-/* จัดตัวอักษรในการ์ดรายสัปดาห์ให้บาลานซ์ */
 .day-title{ font-weight:600; }
 .day-range{ margin-top:6px; }
 
 .chart-card{
-  margin-top: 10px;
+  margin-top:10px;
   background: rgba(255,255,255,.6);
   border:1px solid var(--ring);
-  border-radius: 12px;
-  padding: 10px;
+  border-radius:12px;
+  padding:10px;
 }
-body.night .chart-card{
-  background: rgba(255,255,255,.08);
+body.night .chart-card{ background: rgba(255,255,255,.08); }
+
+/* ================= Loading Overlay (ใหม่) ================= */
+.loading{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  background:#eaf4ff;         /* ฟ้าอ่อน */
+  color:#0f2137;
+}
+.loading.hidden{ display:none; }
+
+/* spinner */
+.loading .spinner{
+  width:60px; height:60px;
+  border:6px solid rgba(255,255,255,.6);
+  border-top:6px solid #3b82f6;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+
+/* progress bar */
+.progress-wrap{
+  width:220px; height:10px;
+  background:rgba(255,255,255,.75);
+  border-radius:8px; overflow:hidden;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.04);
+}
+.progress-bar{
+  height:100%; width:0%;
+  background:#3b82f6;
+  transition:width .3s ease;
+}
+
+/* ข้อความ */
+.loading .msg{
+  font-weight:700;
+  color:#3b82f6;
 }

@@ -22,6 +22,17 @@ function showUiError(msg) {
   else { el.style.display = 'block'; el.textContent = msg; }
 }
 
+// ---- Loading overlay --------------------------------------------------------
+function showLoading(on) {
+  const box = document.getElementById('loading'); if (!box) return;
+  box.classList.toggle('hidden', !on);
+}
+function setProgress(pct) {
+  const bar = document.getElementById('progressBar'); if (!bar) return;
+  const p = Math.max(0, Math.min(100, Math.round(pct)));
+  bar.style.width = p + '%';
+}
+
 // ---- Theme / Sky ------------------------------------------------------------
 function classifyWeather(s) {
   s = (s || '').toLowerCase();
@@ -129,19 +140,20 @@ function rerender() {
   if (_lastDaily)   renderDaily(_lastDaily);
 }
 
-// ---- Fetch & render (exponential backoff + partial success) -----------------
+// ---- Fetch & render (exponential backoff + partial success + overlay) -------
 async function fetchAll() {
   const HOURS_FIRST_LOAD = 6;
+
+  // เริ่ม overlay + รีเซ็ต progress
+  showLoading(true); setProgress(5);
 
   // fetch พร้อม timeout
   const withTimeout = (url, ms) => {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), ms);
-    return fetch(url, { signal: ctrl.signal })
-      .finally(() => clearTimeout(t));
+    return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
   };
 
-  // ดึงทุกเอ็นพอยต์หนึ่งรอบ ด้วย timeout ที่กำหนด
   const pullOnce = async (timeoutMs) => {
     const [metaR, curR, recR, dayR] = await Promise.allSettled([
       withTimeout(window.API_URL + '/api/meta', timeoutMs).then(r => r.json()),
@@ -152,11 +164,12 @@ async function fetchAll() {
     return { metaR, curR, recR, dayR };
   };
 
-  // ลอง 3 ครั้ง: 30s → 15s → 10s (backoff)
-  const attempts = [30000, 15000, 10000];
+  // backoff 3 รอบ
+  const attempts = [15000, 12000, 9000];
 
   for (let i = 0; i < attempts.length; i++) {
     try {
+      setProgress(10 + i * 20);
       const { metaR, curR, recR, dayR } = await pullOnce(attempts[i]);
 
       // meta
@@ -166,14 +179,14 @@ async function fetchAll() {
         document.getElementById('tzBadge').textContent    = '🕒 ' + metaR.value.tz;
       }
 
-      // ส่วนที่ได้สำเร็จให้เรนเดอร์ทันที
+      // เรนเดอร์ส่วนที่สำเร็จ
       let anyOk = false;
       if (curR.status === 'fulfilled') { _lastCurrent = curR.value; renderCurrent(_lastCurrent); anyOk = true; }
       if (recR.status === 'fulfilled') { _lastRecent  = recR.value; renderHourly(_lastRecent);   anyOk = true; }
       if (dayR.status === 'fulfilled') { _lastDaily   = dayR.value; renderDaily(_lastDaily);     anyOk = true; }
 
       if (anyOk) {
-        // ซ่อน error, ตั้งนาฬิกา/ท้องฟ้า, เก็บแคช, วาดกราฟ
+        setProgress(90);
         showUiError('');
         startClock();
 
@@ -183,19 +196,22 @@ async function fetchAll() {
         }
         try { localStorage.setItem(CACHE_KEY, JSON.stringify({ current:_lastCurrent, recent:_lastRecent, daily:_lastDaily })); } catch {}
         updateCharts();
-
-        // เติม hourly ให้ครบ 12 ชม. ภายหลัง
         setTimeout(loadMoreHours, 1200);
-        return; // จบความพยายามเมื่อมีข้อมูลบางส่วนแล้ว
+
+        setProgress(100);
+        showLoading(false); // ซ่อนหน้าโหลดเมื่อได้ข้อมูลจริงบางส่วนแล้ว
+        return;
       }
     } catch (e) {
       console.warn('fetchAll attempt error:', e);
     }
-    // backoff เล็กน้อยก่อนลองใหม่ (1s, 2s)
-    if (i < attempts.length - 1) await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+    // หน่วงเล็กน้อยก่อนลองใหม่
+    if (i < attempts.length - 1) await new Promise(r => setTimeout(r, 700));
   }
 
-  // ยังไม่ได้อะไรสด ๆ → ใช้แคชต่อไป
+  // ไม่ได้ข้อมูลสดเลย → แสดงหน้า (ใช้แคชถ้ามี) และบอกผู้ใช้
+  setProgress(100);
+  showLoading(false);
   showUiError('เชื่อมต่อช้า/หลุด • กำลังแสดงข้อมูลล่าสุดที่เคยบันทึกไว้');
 }
 
@@ -379,16 +395,17 @@ function hydrateFromCache() {
       _lastDaily   = cached.daily   || null;
       rerender();
       updateCharts();
-      showUiError('กำลังแสดงข้อมูลล่าสุดที่เคยบันทึกไว้ • กำลังอัปเดต...');
+      // ไม่แสดง error สีแดงตอนบูต — ให้ overlay ค้างจนกว่าจะโหลดสดสำเร็จหรือครบ retry
     }
   } catch {}
 }
 
 function boot() {
+  showLoading(true); setProgress(5);   // เริ่มหน้าโหลดทันที
   hydrateFromCache();
   initControls();
   fetchAll();
-  setTimeout(fetchAll, 250); // กัน resource บางตัวมาช้า
+  setTimeout(fetchAll, 250);           // กัน resource บางตัวมาช้า
   // อุ่นเครื่อง API ให้ตื่นเร็วขึ้น (cold start)
   fetch(window.API_URL + '/api/meta').catch(()=>{});
 }
