@@ -5,25 +5,36 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>🌤️ สภาพอากาศ (TH)</title>
 
-  <!-- fonts -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Config ก่อน เพื่อให้ app.js ใช้ API_URL ได้ -->
   <script src="config.js" defer></script>
+
+  <!-- Chart.js ต้องมาก่อน app.js (ทั้งคู่ defer แต่ลำดับจะตามการประกาศ) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+
+  <!-- App หลัก -->
   <script src="app.js" defer></script>
 </head>
 <body>
+  <!-- เลเยอร์เอฟเฟกต์ท้องฟ้า -->
   <div id="wxfx" aria-hidden="true"></div>
 
   <div class="page">
+    <!-- ส่วนหัว -->
     <header class="hero">
       <div class="title">🌤️ สภาพอากาศ (TH)</div>
       <div class="subtitle"><span id="placeHdr">Bangkok, TH</span></div>
     </header>
 
-    <div class="toolbar topbar">
+    <!-- แถบเครื่องมือ -->
+    <div class="toolbar topbar" role="toolbar" aria-label="ตัวเลือกการแสดงผล">
       <div class="left chips">
         <span class="badge chip" id="placeBadge">📍 Bangkok, TH</span>
         <span class="badge chip" id="tzBadge">🕒 Asia/Bangkok</span>
@@ -32,20 +43,22 @@
       <div id="uiError" class="uierror" style="display:none"></div>
 
       <div class="right controls">
-        <button id="btnRefresh" class="btn"><span class="spin-icon">🔄</span> <span class="lbl">Refresh</span></button>
+        <button id="btnRefresh" class="btn" title="รีเฟรชข้อมูล">
+          <span class="spin-icon" aria-hidden="true">🔄</span> <span class="lbl">Refresh</span>
+        </button>
 
-        <div class="seg">
+        <div class="seg" role="group" aria-label="หน่วยอุณหภูมิ">
           <button id="unitC" class="seg-btn active">°C</button>
           <button id="unitF" class="seg-btn">°F</button>
         </div>
 
-        <div class="seg">
+        <div class="seg" role="group" aria-label="โหมดแสง">
           <button id="modeLight" class="seg-btn active">☀️ Light</button>
           <button id="modeNight" class="seg-btn">🌙 Night</button>
         </div>
 
         <label class="muted small">Auto-refresh
-          <select id="autoSel">
+          <select id="autoSel" aria-label="ตั้งค่ารีเฟรชอัตโนมัติ">
             <option value="0">Off</option>
             <option value="15">15s</option>
             <option value="30">30s</option>
@@ -55,43 +68,63 @@
       </div>
     </div>
 
+    <!-- เนื้อหาหลัก -->
     <main class="container stack">
-      <section class="card current now">
+      <!-- การ์ด: ปัจจุบัน -->
+      <section class="card current now" aria-labelledby="hdr-now">
         <div class="headline">
           <div>
-            <div class="title-th">สภาพอากาศปัจจุบัน</div>
+            <h2 id="hdr-now" class="title-th">สภาพอากาศปัจจุบัน</h2>
             <div id="updatedAt" class="updated-line muted">อัปเดตล่าสุด —</div>
           </div>
         </div>
 
-        <div class="currentTemp">
-          <div id="emoji" class="emoji">☀️</div>
+        <div class="currentTemp" aria-live="polite">
+          <div id="emoji" class="emoji" aria-hidden="true">☀️</div>
           <div id="temp" class="temp">—°C</div>
         </div>
 
         <div class="grid4 metrics">
-          <div class="kv"><span class="label"><span class="emj">💧</span> ความชื้น</span><b id="rh">—%</b></div>
           <div class="kv">
-            <span class="label"><span class="emj">🌬️</span> ลม</span>
-            <b id="wind">— m/s</b>
-            <div class="arrow" id="windDir" title="ทิศลม">↑</div>
+            <span class="label"><span class="emj" aria-hidden="true">💧</span> ความชื้น</span>
+            <b id="rh">—%</b>
           </div>
-          <div class="kv"><span class="label"><span class="emj">🧭</span> ความกดอากาศ</span><b id="press">— hPa</b></div>
+          <div class="kv">
+            <span class="label"><span class="emj" aria-hidden="true">🌬️</span> ลม</span>
+            <b id="wind">— m/s</b>
+            <div class="arrow" id="windDir" title="ทิศลม" aria-hidden="true">↑</div>
+          </div>
+          <div class="kv">
+            <span class="label"><span class="emj" aria-hidden="true">🧭</span> ความกดอากาศ</span>
+            <b id="press">— hPa</b>
+          </div>
         </div>
       </section>
 
-      <section class="card hourly">
-        <h3>⏱️ รายชั่วโมง</h3>
+      <!-- การ์ด: รายชั่วโมง -->
+      <section class="card hourly" aria-labelledby="hdr-hourly">
+        <h3 id="hdr-hourly">⏱️ รายชั่วโมง</h3>
         <div id="hourly" class="hlist hours-grid"></div>
+
+        <!-- กราฟรายชั่วโมง -->
+        <div class="chart-card" aria-label="กราฟอุณหภูมิรายชั่วโมง">
+          <canvas id="chartHourly" height="120"></canvas>
+        </div>
       </section>
 
-      <section class="card daily">
-        <h3>📅 รายสัปดาห์</h3>
+      <!-- การ์ด: รายสัปดาห์ -->
+      <section class="card daily" aria-labelledby="hdr-daily">
+        <h3 id="hdr-daily">📅 รายสัปดาห์</h3>
         <div id="daily" class="dlist days-grid"></div>
+
+        <!-- กราฟรายสัปดาห์ Min/Max -->
+        <div class="chart-card" aria-label="กราฟอุณหภูมิรายสัปดาห์ (ต่ำสุด/สูงสุด)">
+          <canvas id="chartDaily" height="120"></canvas>
+        </div>
       </section>
 
       <footer class="muted">
-        แหล่งข้อมูล: OPEN-METEO · ผู้จัดทำ: NATTHANITCHA & SRONSAWAN · Timezone: Asia/Bangkok
+        แหล่งข้อมูล: OPEN-METEO · ผู้จัดทำ: NATTHANITCHA &amp; SRONSAWAN · Timezone: Asia/Bangkok
       </footer>
     </main>
   </div>
