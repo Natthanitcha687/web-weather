@@ -134,7 +134,7 @@ body.night .title{ color:var(--ink); }
 
 /* ทำให้เมฆชัดขึ้น “เฉพาะ Light mode” */
 body:not(.night) .cloud{
-  opacity:.46;          /* เดิม .32 → ชัดขึ้น */
+  opacity:.55;          /* เดิม .32 → ชัดขึ้น */
   filter: blur(.6px);   /* ลดความเบลอเล็กน้อย */
   box-shadow: 0 8px 24px rgba(255,255,255,.18) inset; /* ไฮไลต์ในก้อนเมฆเบา ๆ */
 }
