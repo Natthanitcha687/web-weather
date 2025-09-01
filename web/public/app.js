@@ -1,5 +1,7 @@
+// ================== app.js (frontend) ==================
 // Cache last data
 let _lastCurrent = null, _lastRecent = null, _lastDaily = null, _autotimer = null;
+const CACHE_KEY = 'wx_last';
 
 const TZ = 'Asia/Bangkok';
 const fmtThai = d =>
@@ -141,59 +143,77 @@ function rerender() {
   if (_lastDaily) renderDaily(_lastDaily);
 }
 
-// ========= Fetch & render (ทนทานขึ้น) =========
+// ========= Fetch & render (โหลดไวขึ้น/ทนทานขึ้น) =========
 async function fetchAll() {
+  // ตั้ง timeout กันค้าง (เช่น 10s)
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10000);
+
+  // รอบแรกดึง recent แค่ 6 ชม. ให้ไว แล้วค่อยโหลดเพิ่มทีหลัง (ออปชัน)
+  const HOURS_FIRST_LOAD = 6;
+
   try {
-    const [metaR, currentR, recentR, dailyR] = await Promise.allSettled([
-      fetch(window.API_URL + '/api/meta').then(r => r.json()),
-      fetch(window.API_URL + '/api/live/current').then(r => r.json()),
-      fetch(window.API_URL + '/api/live/recent?hours=12').then(r => r.json()),
-      fetch(window.API_URL + '/api/live/daily?days=7').then(r => r.json())
+    const [meta, current, recent, daily] = await Promise.all([
+      fetch(window.API_URL + '/api/meta',                  { signal: ctrl.signal }).then(r => r.json()),
+      fetch(window.API_URL + '/api/live/current',          { signal: ctrl.signal }).then(r => r.json()),
+      fetch(window.API_URL + `/api/live/recent?hours=${HOURS_FIRST_LOAD}`, { signal: ctrl.signal }).then(r => r.json()),
+      fetch(window.API_URL + '/api/live/daily?days=7',     { signal: ctrl.signal }).then(r => r.json())
     ]);
+    clearTimeout(timer);
 
     // meta
-    if (metaR.status === 'fulfilled' && metaR.value?.place) {
-      document.getElementById('placeHdr').textContent = metaR.value.place;
-      document.getElementById('placeBadge').textContent = '📍 ' + metaR.value.place;
-      document.getElementById('tzBadge').textContent = '🕒 ' + metaR.value.tz;
+    if (meta?.place) {
+      document.getElementById('placeHdr').textContent = meta.place;
+      document.getElementById('placeBadge').textContent = '📍 ' + meta.place;
+      document.getElementById('tzBadge').textContent = '🕒 ' + meta.tz;
     }
 
-    // current
-    if (currentR.status === 'fulfilled') {
-      _lastCurrent = currentR.value;
-      renderCurrent(currentR.value);
-    }
-
-    // hourly
-    if (recentR.status === 'fulfilled') {
-      _lastRecent = recentR.value;
-      renderHourly(recentR.value);
-    } else {
-      const host = document.getElementById('hourly'); if (host) host.innerHTML = '';
-    }
-
-    // daily
-    if (dailyR.status === 'fulfilled') {
-      _lastDaily = dailyR.value;
-      renderDaily(dailyR.value);
-    } else {
-      const host = document.getElementById('daily'); if (host) host.innerHTML = '';
-    }
-
+    // อัปเดต state + เรนเดอร์
+    _lastCurrent = current;  renderCurrent(_lastCurrent);
+    _lastRecent  = recent;   renderHourly(_lastRecent);
+    _lastDaily   = daily;    renderDaily(_lastDaily);
     startClock();
+    showUiError('');
 
-    if (currentR.status === 'fulfilled') {
-      const c = currentR.value;
-      const kind = classifyWeather((c.symbol_code || '') + ' ' + (c.symbol_emoji || ''));
-      composeSky(kind.includes('rain') ? 'rain' : kind, new Date());
-    }
+    // ปรับท้องฟ้าตามสถานะ
+    const kind = classifyWeather((current?.symbol_code || '') + ' ' + (current?.symbol_emoji || ''));
+    composeSky(kind.includes('rain') ? 'rain' : kind, new Date());
 
-    const allFailed = [metaR, currentR, recentR, dailyR].every(r => r.status === 'rejected');
-    showUiError(allFailed ? 'เชื่อมต่อ API ไม่ได้ • ตรวจสอบ service api และ API_URL' : '');
+    // เก็บแคชไว้ใช้ครั้งถัดไปเปิดมาจะโชว์ทันที
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        current: _lastCurrent,
+        recent : _lastRecent,
+        daily  : _lastDaily
+      }));
+    } catch {}
 
+    // (ออปชัน) โหลด recent เพิ่มให้ครบ 12 ชม. หลังหน้าเสถียรแล้ว
+    setTimeout(loadMoreHours, 1200);
   } catch (e) {
-    console.error(e);
-    showUiError('เชื่อมต่อ API ไม่ได้ • ตรวจสอบ service api และ API_URL');
+    clearTimeout(timer);
+    // ถ้าล้มเหลว ให้ใช้ข้อมูลในแคชต่อไป และแจ้งเตือนสุภาพ
+    showUiError('เชื่อมต่อช้า/หลุด • กำลังแสดงข้อมูลล่าสุดที่เคยบันทึกไว้');
+    console.warn('fetchAll error:', e);
+  }
+}
+
+// โหลด recent เพิ่มจาก 6 → 12 ชม. (ออปชัน)
+async function loadMoreHours() {
+  try {
+    const r = await fetch(window.API_URL + '/api/live/recent?hours=12').then(x => x.json());
+    if (Array.isArray(r) && r.length) {
+      _lastRecent = r;
+      renderHourly(_lastRecent);
+      // sync cache
+      try {
+        const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+        cached.recent = _lastRecent;
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
+      } catch {}
+    }
+  } catch (e) {
+    console.warn('loadMoreHours error:', e);
   }
 }
 
@@ -201,14 +221,14 @@ function renderCurrent(c) {
   const last = document.getElementById('lastUpdated');
   if (last) { last.textContent = ''; last.style.display = 'none'; }
 
-  document.getElementById('emoji').textContent = c.symbol_emoji || '⛅';
-  document.getElementById('temp').textContent = formatTemp(c.air_temperature);
-  document.getElementById('rh').textContent = (c.relative_humidity != null ? c.relative_humidity.toFixed(1) + '%' : '—');
-  document.getElementById('wind').textContent = (c.wind_speed_ms != null ? c.wind_speed_ms.toFixed(1) + ' m/s' : '—');
-  document.getElementById('press').textContent = (c.pressure_hpa != null ? c.pressure_hpa.toFixed(1) + ' hPa' : '—');
+  document.getElementById('emoji').textContent = c?.symbol_emoji || '⛅';
+  document.getElementById('temp').textContent  = formatTemp(c?.air_temperature);
+  document.getElementById('rh').textContent    = (c?.relative_humidity != null ? c.relative_humidity.toFixed(1) + '%' : '—');
+  document.getElementById('wind').textContent  = (c?.wind_speed_ms != null ? c.wind_speed_ms.toFixed(1) + ' m/s' : '—');
+  document.getElementById('press').textContent = (c?.pressure_hpa != null ? c.pressure_hpa.toFixed(1) + ' hPa' : '—');
 
   const dir = document.getElementById('windDir');
-  if (dir && c.wind_from_deg != null) { dir.style.transform = `rotate(${c.wind_from_deg}deg)`; }
+  if (dir && c?.wind_from_deg != null) { dir.style.transform = `rotate(${c.wind_from_deg}deg)`; }
 }
 
 /* ========= อิโมจิรายชั่วโมง: กลางคืนใช้พระจันทร์ ========= */
@@ -295,7 +315,30 @@ function renderDaily(list) {
   });
 }
 
+// ========== Boot ==========
+// 1) แสดงจาก cache ทันที (ถ้ามี) ให้รู้สึกไว
+function hydrateFromCache() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    if (cached) {
+      _lastCurrent = cached.current || null;
+      _lastRecent  = cached.recent  || null;
+      _lastDaily   = cached.daily   || null;
+      rerender();
+      showUiError('กำลังแสดงข้อมูลล่าสุดที่เคยบันทึกไว้ • กำลังอัปเดต...');
+    }
+  } catch {}
+}
 
-// Boot
-function boot() { initControls(); fetchAll(); setTimeout(fetchAll, 250); }
-if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+function boot() {
+  hydrateFromCache();
+  initControls();
+  fetchAll();               // ดึงจริงรอบแรก
+  setTimeout(fetchAll, 250); // กันกรณี resource บางตัวมาช้า
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
