@@ -73,7 +73,7 @@ body{
 .grid4.metrics{
   display:grid;
   gap:12px;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* ↑ เพิ่ม min 200px ให้ลงตัวสามช่อง */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   margin-top:12px;
 }
 .kv{
@@ -84,7 +84,7 @@ body{
   min-width:0;
 }
 .label{ color:var(--muted); font-size:14px; }
-.small{ font-size:12px; } /* เสริม: class .small ที่ใช้ในหลายจุด */
+.small{ font-size:12px; }
 .arrow{ margin-top:6px; opacity:.7 }
 
 /* รายชั่วโมง/รายสัปดาห์ */
@@ -132,6 +132,17 @@ body.night .title{ color:var(--ink); }
 .sun{ background:radial-gradient(#fffca8,#ffd34d)}
 .moon{ background:radial-gradient(#fff,#cfd8ff); box-shadow:0 0 30px rgba(180,200,255,.5)}
 
+/* ทำให้เมฆชัดขึ้น “เฉพาะ Light mode” */
+body:not(.night) .cloud{
+  opacity:.46;          /* เดิม .32 → ชัดขึ้น */
+  filter: blur(.6px);   /* ลดความเบลอเล็กน้อย */
+  box-shadow: 0 8px 24px rgba(255,255,255,.18) inset; /* ไฮไลต์ในก้อนเมฆเบา ๆ */
+}
+body:not(.night) .cloud::before,
+body:not(.night) .cloud::after{
+  background:#ffffff;   /* ขาวจัดขึ้นนิด */
+}
+
 .fxDrop{ position:absolute; top:-5vh; width:2px; height:18px; background:#73a7ff; opacity:.55; animation:fall linear 1.1s }
 @keyframes fall{ to{ transform:translateY(105vh) } }
 
@@ -168,6 +179,7 @@ body.night .title{ color:var(--ink); }
   .emoji{ font-size: 36px; }
   .temp{ font-size: 32px; }
 }
+
 /* ========== WEEKLY COLOR TOKENS ========== */
 /* 0=Sun, 1=Mon, ... 6=Sat */
 .w0 { --wk:#ff6b6b;  --wkbg:rgba(255,107,107,.08); }   /* Sun – red   */
@@ -198,6 +210,7 @@ body.night .title{ color:var(--ink); }
 /* จัดตัวอักษรในการ์ดรายสัปดาห์ให้บาลานซ์ */
 .day-title{ font-weight:600; }
 .day-range{ margin-top:6px; }
+
 .chart-card{
   margin-top: 10px;
   background: rgba(255,255,255,.6);
